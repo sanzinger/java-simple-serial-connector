@@ -1,4 +1,5 @@
 /* jSSC (Java Simple Serial Connector) - serial port communication library.
+printf("Set baudrate: %d", baud);
  * © Alexey Sokolov (scream3r), 2010-2014.
  *
  * This file is part of jSSC.
@@ -45,6 +46,7 @@
 
 #include <jni.h>
 #include "../jssc_SerialNativeInterface.h"
+#include "setCustomBaudrate.hpp"
 
 //#include <iostream> //-lCstd use for Solaris linker
 
@@ -261,7 +263,10 @@ JNIEXPORT jboolean JNICALL Java_jssc_SerialNativeInterface_setParams
             serial_struct *serial_info = new serial_struct();
             if(ioctl(portHandle, TIOCGSERIAL, serial_info) < 0){ //Getting serial_info structure
                 delete serial_info;
-                goto methodEnd;
+                if(setCustomBaudrate(portHandle, baudRate)) {
+                   printf("Setting custom baud rate failed\n");
+                }
+                tcgetattr(portHandle, settings);
             }
             else {
                 serial_info->flags |= ASYNC_SPD_CUST;
@@ -375,7 +380,6 @@ JNIEXPORT jboolean JNICALL Java_jssc_SerialNativeInterface_setParams
     else {
         goto methodEnd;
     }
-
     if(tcsetattr(portHandle, TCSANOW, settings) == 0){//Try to set all settings
     #ifdef __APPLE__
         //Try to set non-standard baud rate in Mac OS X

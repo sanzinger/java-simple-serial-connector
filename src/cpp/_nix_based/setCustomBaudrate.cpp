@@ -33,7 +33,7 @@ bool setCustomBaudrate(jlong port, jint baud) {
 	if(ioctl(port, TCGETS2, info)) {
 		perror("Cannot get portinfo.");
 		delete info;
-		return false;
+		return true;
 	}
 	info->c_cflag &= ~CBAUD;
 	info->c_cflag |= BOTHER;
@@ -42,8 +42,8 @@ bool setCustomBaudrate(jlong port, jint baud) {
 	if(ioctl(port, TCSETS2, info)) {
 		perror("Cannot set custom baudrate.");
 		delete info;
-		return false;
+		return true;
 	}
 	delete info;
-	return true;
+	return false;
 }
